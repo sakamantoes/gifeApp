@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "NutriTrack",
-    "slug": "nutritrack", 
+    "slug": "nutritrack",
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
@@ -20,12 +20,17 @@
       "package": "com.yourcompany.nutritrack",
       "permissions": [
         "RECEIVE_BOOT_COMPLETED",
-        "WAKE_LOCK", 
+        "WAKE_LOCK",
         "VIBRATE"
       ]
     },
     "plugins": [
       "expo-notifications"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "e29d18c6-7b0c-424b-b21c-cf7bea33aa84"
+      }
+    }
   }
 }
