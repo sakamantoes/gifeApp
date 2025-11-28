@@ -1,50 +1,31 @@
 {
   "expo": {
     "name": "NutriTrack",
-    "slug": "nutritrack",
+    "slug": "nutritrack", 
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#2e86de",
+      "resizeMode": "contain"
     },
     "assetBundlePatterns": [
       "**/*"
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.yourcompany.nutritrack",
-      "infoPlist": {
-        "UIBackgroundModes": ["remote-notification"]
-      }
+      "bundleIdentifier": "com.yourcompany.nutritrack"
     },
     "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#FFFFFF"
-      },
       "package": "com.yourcompany.nutritrack",
       "permissions": [
         "RECEIVE_BOOT_COMPLETED",
-        "WAKE_LOCK",
+        "WAKE_LOCK", 
         "VIBRATE"
-      ],
-      "useNextNotificationsApi": true
+      ]
     },
     "plugins": [
-      [
-        "expo-notifications",
-        {
-          "icon": "./assets/notification-icon.png",
-          "color": "#2e86de",
-          "sounds": ["./assets/notification-sound.wav"],
-          "defaultVolume": 0.8,
-          "mode": "production"
-        }
-      ]
+      "expo-notifications"
     ]
   }
 }
