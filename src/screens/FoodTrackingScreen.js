@@ -8,7 +8,8 @@ import {
   ScrollView,
   Alert,
   Modal,
-  Dimensions
+  Dimensions,
+  Image
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useAuth } from '../services/AuthContext';
@@ -82,14 +83,24 @@ export default function FoodTrackingScreen({ navigation }) {
     setShowCalculator(true);
   };
 
-  const getMealTypeIcon = (type) => {
-    const icons = {
-      breakfast: 'free-breakfast',
-      lunch: 'lunch-dining',
-      dinner: 'dinner-dining',
-      snack: 'local-cafe'
+  const getMealTypeImage = (type) => {
+    const images = {
+      breakfast: require('../icons/breakfast.png'),
+      lunch: require('../icons/lunch.png'),
+      dinner: require('../icons/dinner.png'),
+      snack: require('../icons/snack.png')
     };
-    return icons[type] || 'restaurant';
+    return images[type] || require('../icons/default-meal.png');
+  };
+
+  const getMealTypeDisplayName = (type) => {
+    const names = {
+      breakfast: 'Breakfast',
+      lunch: 'Lunch',
+      dinner: 'Dinner',
+      snack: 'Snack'
+    };
+    return names[type] || 'Meal';
   };
 
   return (
@@ -98,7 +109,10 @@ export default function FoodTrackingScreen({ navigation }) {
         {/* Header Section */}
         <View style={styles.headerCard}>
           <View style={styles.headerContent}>
-            <Icon name="restaurant" size={32} color="#2e86de" />
+            <Image 
+              source={require('../icons/food-tracker.png')}
+              style={styles.headerIcon}
+            />
             <View style={styles.headerText}>
               <Text style={styles.headerTitle}>Track Your Meal</Text>
               <Text style={styles.headerSubtitle}>Log your food and track nutrition</Text>
@@ -110,7 +124,10 @@ export default function FoodTrackingScreen({ navigation }) {
         <View style={styles.card}>
           <View style={styles.cardHeader}>
             <Text style={styles.cardTitle}>Add Food Entry</Text>
-            <Icon name="edit" size={20} color="#6c757d" />
+            <Image 
+              source={require('../icons/edit.png')}
+              style={styles.smallIcon}
+            />
           </View>
           
           <TextInput
@@ -153,18 +170,22 @@ export default function FoodTrackingScreen({ navigation }) {
                       ]}
                       onPress={() => setMealType(type)}
                     >
-                      <Icon 
-                        name={getMealTypeIcon(type)} 
-                        size={16} 
-                        color={mealType === type ? 'white' : '#6c757d'} 
-                      />
+                      <View style={styles.mealImageContainer}>
+                        <Image 
+                          source={getMealTypeImage(type)}
+                          style={[
+                            styles.mealImage,
+                            mealType === type && styles.mealImageActive
+                          ]}
+                        />
+                      </View>
                       <Text 
                         style={[
                           styles.mealButtonText,
                           mealType === type && styles.mealButtonTextActive
                         ]}
                       >
-                        {type.charAt(0).toUpperCase() + type.slice(1)}
+                        {getMealTypeDisplayName(type)}
                       </Text>
                     </TouchableOpacity>
                   ))}
@@ -181,7 +202,10 @@ export default function FoodTrackingScreen({ navigation }) {
             onPress={calculateNutrition}
             disabled={!foodName.trim()}
           >
-            <Icon name="calculate" size={20} color="white" />
+            <Image 
+              source={require('../icons/calculate.png')}
+              style={styles.buttonIcon}
+            />
             <Text style={styles.calculateButtonText}>Calculate Nutrition</Text>
           </TouchableOpacity>
         </View>
@@ -191,7 +215,10 @@ export default function FoodTrackingScreen({ navigation }) {
           <View style={styles.card}>
             <View style={styles.cardHeader}>
               <Text style={styles.cardTitle}>Recent Foods</Text>
-              <Icon name="history" size={20} color="#6c757d" />
+              <Image 
+                source={require('../icons/history.png')}
+                style={styles.smallIcon}
+              />
             </View>
             <View style={styles.recentFoodsGrid}>
               {recentFoods.map((food, index) => (
@@ -201,7 +228,10 @@ export default function FoodTrackingScreen({ navigation }) {
                   onPress={() => quickAddFood(food)}
                 >
                   <View style={styles.recentFoodIcon}>
-                    <Icon name="fastfood" size={16} color="#2e86de" />
+                    <Image 
+                      source={require('../icons/fast-food.png')}
+                      style={styles.foodIcon}
+                    />
                   </View>
                   <Text style={styles.recentFoodName} numberOfLines={1}>
                     {food.foodName}
@@ -218,7 +248,10 @@ export default function FoodTrackingScreen({ navigation }) {
         {/* Quick Tips */}
         <View style={styles.tipsCard}>
           <View style={styles.tipsHeader}>
-            <Icon name="lightbulb" size={20} color="#ff9f43" />
+            <Image 
+              source={require('../icons/lightbulb.png')}
+              style={styles.tipsIcon}
+            />
             <Text style={styles.tipsTitle}>Quick Tips</Text>
           </View>
           <View style={styles.tipsContent}>
@@ -246,25 +279,34 @@ export default function FoodTrackingScreen({ navigation }) {
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
               <View style={styles.modalTitleContainer}>
-                <Icon name="nutrition" size={24} color="#2e86de" />
+                <Image 
+                  source={require('../icons/nutrition.png')}
+                  style={styles.modalIcon}
+                />
                 <Text style={styles.modalTitle}>Nutrition Details</Text>
               </View>
               <TouchableOpacity 
                 style={styles.closeButton}
                 onPress={() => setShowCalculator(false)}
               >
-                <Icon name="close" size={24} color="#6c757d" />
+                <Image 
+                  source={require('../icons/close.png')}
+                  style={styles.closeIcon}
+                />
               </TouchableOpacity>
             </View>
 
             {nutritionInfo && (
               <View style={styles.modalBody}>
                 <View style={styles.foodHeader}>
-                  <Icon name="check-circle" size={24} color="#10ac84" />
+                  <Image 
+                    source={require('../icons/check-circle.png')}
+                    style={styles.checkIcon}
+                  />
                   <View style={styles.foodInfo}>
                     <Text style={styles.foodName}>{foodName}</Text>
                     <Text style={styles.quantity}>
-                      {quantity} serving{parseFloat(quantity) !== 1 ? 's' : ''} • {mealType}
+                      {quantity} serving{parseFloat(quantity) !== 1 ? 's' : ''} • {getMealTypeDisplayName(mealType)}
                     </Text>
                   </View>
                 </View>
@@ -274,26 +316,38 @@ export default function FoodTrackingScreen({ navigation }) {
                   <View style={[styles.nutritionCard, styles.caloriesCard]}>
                     <Text style={styles.nutritionValue}>{nutritionInfo.calories}</Text>
                     <Text style={styles.nutritionLabel}>Calories</Text>
-                    <Icon name="local-fire-department" size={20} color="#e74c3c" style={styles.nutritionIcon} />
+                    <Image 
+                      source={require('../icons/calories.png')}
+                      style={styles.nutritionIcon}
+                    />
                   </View>
 
                   <View style={styles.macrosRow}>
                     <View style={[styles.nutritionCard, styles.proteinCard]}>
                       <Text style={styles.nutritionValue}>{nutritionInfo.protein}g</Text>
                       <Text style={styles.nutritionLabel}>Protein</Text>
-                      <Icon name="fitness-center" size={16} color="#2e86de" style={styles.nutritionIcon} />
+                      <Image 
+                        source={require('../icons/protein.png')}
+                        style={styles.nutritionIcon}
+                      />
                     </View>
 
                     <View style={[styles.nutritionCard, styles.carbsCard]}>
                       <Text style={styles.nutritionValue}>{nutritionInfo.carbs}g</Text>
                       <Text style={styles.nutritionLabel}>Carbs</Text>
-                      <Icon name="grass" size={16} color="#10ac84" style={styles.nutritionIcon} />
+                      <Image 
+                        source={require('../icons/carbs.png')}
+                        style={styles.nutritionIcon}
+                      />
                     </View>
 
                     <View style={[styles.nutritionCard, styles.fatCard]}>
                       <Text style={styles.nutritionValue}>{nutritionInfo.fat}g</Text>
                       <Text style={styles.nutritionLabel}>Fat</Text>
-                      <Icon name="water-drop" size={16} color="#ff9f43" style={styles.nutritionIcon} />
+                      <Image 
+                        source={require('../icons/fat.png')}
+                        style={styles.nutritionIcon}
+                      />
                     </View>
                   </View>
                 </View>
@@ -303,7 +357,10 @@ export default function FoodTrackingScreen({ navigation }) {
                     style={styles.cancelButton}
                     onPress={() => setShowCalculator(false)}
                   >
-                    <Icon name="arrow-back" size={18} color="#6c757d" />
+                    <Image 
+                      source={require('../icons/arrow-back.png')}
+                      style={styles.actionIcon}
+                    />
                     <Text style={styles.cancelButtonText}>Back</Text>
                   </TouchableOpacity>
                   
@@ -311,7 +368,10 @@ export default function FoodTrackingScreen({ navigation }) {
                     style={styles.saveButton}
                     onPress={saveFoodEntry}
                   >
-                    <Icon name="save" size={18} color="white" />
+                    <Image 
+                      source={require('../icons/save.png')}
+                      style={styles.actionIcon}
+                    />
                     <Text style={styles.saveButtonText}>Save Entry</Text>
                   </TouchableOpacity>
                 </View>
@@ -349,6 +409,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
+  headerIcon: {
+    width: 40,
+    height: 40,
+    resizeMode: 'contain',
+  },
   headerText: {
     marginLeft: 12,
   },
@@ -384,6 +449,11 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     color: '#2c3e50',
+  },
+  smallIcon: {
+    width: 20,
+    height: 20,
+    resizeMode: 'contain',
   },
   // Input Styles
   input: {
@@ -434,30 +504,43 @@ const styles = StyleSheet.create({
   },
   mealButtons: {
     flexDirection: 'row',
-    gap: 8,
+    gap: 12,
   },
   mealButton: {
-    flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 20,
+    padding: 12,
+    borderRadius: 16,
     backgroundColor: '#f8f9fa',
-    borderWidth: 1,
-    borderColor: '#e9ecef',
-    gap: 6,
+    borderWidth: 2,
+    borderColor: 'transparent',
+    minWidth: 80,
   },
   mealButtonActive: {
-    backgroundColor: '#2e86de',
+    backgroundColor: 'rgba(46, 134, 222, 0.1)',
     borderColor: '#2e86de',
   },
+  mealImageContainer: {
+    width: 40,
+    height: 40,
+    marginBottom: 8,
+  },
+  mealImage: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'contain',
+    opacity: 0.7,
+  },
+  mealImageActive: {
+    opacity: 1,
+  },
   mealButtonText: {
-    fontSize: 14,
-    fontWeight: '500',
+    fontSize: 12,
+    fontWeight: '600',
     color: '#6c757d',
+    textAlign: 'center',
   },
   mealButtonTextActive: {
-    color: 'white',
+    color: '#2e86de',
   },
   // Button Styles
   calculateButton: {
@@ -472,6 +555,11 @@ const styles = StyleSheet.create({
   },
   calculateButtonDisabled: {
     backgroundColor: '#bdc3c7',
+  },
+  buttonIcon: {
+    width: 20,
+    height: 20,
+    resizeMode: 'contain',
   },
   calculateButtonText: {
     color: 'white',
@@ -500,6 +588,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 8,
+  },
+  foodIcon: {
+    width: 16,
+    height: 16,
+    resizeMode: 'contain',
   },
   recentFoodName: {
     fontSize: 14,
@@ -536,6 +629,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 12,
     gap: 8,
+  },
+  tipsIcon: {
+    width: 20,
+    height: 20,
+    resizeMode: 'contain',
   },
   tipsTitle: {
     fontSize: 16,
@@ -583,6 +681,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
   },
+  modalIcon: {
+    width: 24,
+    height: 24,
+    resizeMode: 'contain',
+  },
   modalTitle: {
     fontSize: 20,
     fontWeight: 'bold',
@@ -590,6 +693,11 @@ const styles = StyleSheet.create({
   },
   closeButton: {
     padding: 4,
+  },
+  closeIcon: {
+    width: 24,
+    height: 24,
+    resizeMode: 'contain',
   },
   modalBody: {
     padding: 20,
@@ -599,6 +707,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 24,
     gap: 12,
+  },
+  checkIcon: {
+    width: 24,
+    height: 24,
+    resizeMode: 'contain',
   },
   foodInfo: {
     flex: 1,
@@ -626,6 +739,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 2,
+    position: 'relative',
   },
   caloriesCard: {
     backgroundColor: 'rgba(231, 76, 60, 0.1)',
@@ -664,6 +778,9 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   nutritionIcon: {
+    width: 20,
+    height: 20,
+    resizeMode: 'contain',
     position: 'absolute',
     top: 12,
     right: 12,
@@ -694,6 +811,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
+  },
+  actionIcon: {
+    width: 18,
+    height: 18,
+    resizeMode: 'contain',
   },
   cancelButtonText: {
     color: '#6c757d',

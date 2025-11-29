@@ -5,7 +5,8 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  Alert
+  Alert,
+  Image
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useAuth } from '../services/AuthContext';
@@ -56,7 +57,7 @@ export default function ProfileScreen({ navigation }) { // Add navigation prop
           style={styles.goalButton}
           onPress={() => updateGoal(field, Math.max(0, value - 10))}
         >
-          <Icon name="remove" size={20} color="#6c757d" />
+         <Image source={require('../icon/sub.png')}/>
         </TouchableOpacity>
         
         <Text style={styles.goalValue}>
@@ -67,7 +68,7 @@ export default function ProfileScreen({ navigation }) { // Add navigation prop
           style={styles.goalButton}
           onPress={() => updateGoal(field, value + 10)}
         >
-          <Icon name="add" size={20} color="#6c757d" />
+             <Image source={require('../icon/add.png')}/>
         </TouchableOpacity>
       </View>
     </View>
