@@ -6,10 +6,6 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/icon-adaptive.png",
-        "backgroundColor": "#2e86de"
-      },
       "package": "com.yourcompany.nutritrack",
       "permissions": [
         "RECEIVE_BOOT_COMPLETED",
