@@ -4,19 +4,12 @@
     "slug": "nutritrack",
     "version": "1.0.0",
     "orientation": "portrait",
-    "userInterfaceStyle": "light",
-    "splash": {
-      "backgroundColor": "#2e86de",
-      "resizeMode": "contain"
-    },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
-    "ios": {
-      "supportsTablet": true,
-      "bundleIdentifier": "com.yourcompany.nutritrack"
-    },
+    "icon": "./assets/icon.png",
     "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/icon-adaptive.png",
+        "backgroundColor": "#2e86de"
+      },
       "package": "com.yourcompany.nutritrack",
       "permissions": [
         "RECEIVE_BOOT_COMPLETED",
