@@ -11,6 +11,9 @@ import {
 import { useAuth } from '../services/AuthContext';
 import DataService from '../services/DataService';
 import { NutritionCalculator } from '../utils/NutritionCalculator';
+import {AdvancedNutritionAnalyzer} from '../services/AdvancedNutritionAnalyzer';
+import {MealAdjustmentEngine} from '../services/MealAdjustmentEngine';
+import {TrendPredictionEngine} from '../services/TrendPredictionEngine';
 
 export default function DashboardScreen({ navigation }) {
   const { user, logout } = useAuth();
@@ -27,6 +30,10 @@ export default function DashboardScreen({ navigation }) {
     carbs: 0,
     fat: 0
   });
+  const [nutrientImbalances, setNutrientImbalances] = useState([]);
+  const [mealAdjustments, setMealAdjustments] = useState([]);
+  const [trendPredictions, setTrendPredictions] = useState(null);
+  const [isLoadingAdvanced, setIsLoadingAdvanced] = useState(false);
 
   useEffect(() => {
     loadDashboardData();
@@ -52,6 +59,69 @@ export default function DashboardScreen({ navigation }) {
     }), { calories: 0, protein: 0, carbs: 0, fat: 0 });
 
     setTotalNutrition(totals);
+    
+    // Run advanced analysis if we have data
+    if (entries.length > 0) {
+      runAdvancedAnalysis(totals, userGoals, user);
+    }
+  };
+
+  const runAdvancedAnalysis = async (totals, userGoals, user) => {
+    try {
+      setIsLoadingAdvanced(true);
+      
+      // Get all user entries for trend analysis
+      const allEntries = await DataService.getFoodEntries(user.id);
+      
+      if (allEntries.length === 0) return;
+      
+      // 1. Initialize analyzers
+      const nutritionAnalyzer = new AdvancedNutritionAnalyzer();
+      const mealAdjustmentEngine = new MealAdjustmentEngine();
+      const trendPredictionEngine = new TrendPredictionEngine();
+      
+      // 2. User data for analysis
+      const userData = {
+        totalProtein: totals.protein,
+        totalCarbs: totals.carbs,
+        totalFat: totals.fat,
+        totalCalories: totals.calories,
+        weight: user?.weight || 70
+      };
+      
+      // 3. Nutrient Imbalance Detection
+      const imbalances = nutritionAnalyzer.detectImbalances(userData, allEntries);
+      setNutrientImbalances(imbalances);
+      
+      // 4. Meal Adjustment Suggestions
+      if (todayEntries.length > 0) {
+        const adjustments = [];
+        todayEntries.forEach(entry => {
+          const mealAdjustments = mealAdjustmentEngine.suggestMealAdjustments(
+            entry,
+            userGoals,
+            imbalances
+          );
+          adjustments.push(...mealAdjustments);
+        });
+        setMealAdjustments(adjustments.slice(0, 3)); // Show only 3 adjustments
+      }
+      
+      // 5. Trend Prediction (if we have enough data)
+      if (allEntries.length >= 7) {
+        const trends = trendPredictionEngine.analyzeTrends(allEntries, {
+          ...userGoals,
+          weight: user?.weight,
+          targetWeight: user?.goal === 'weight_loss' ? user.weight * 0.9 : user?.weight
+        });
+        setTrendPredictions(trends);
+      }
+      
+    } catch (error) {
+      console.error('Advanced analysis error:', error);
+    } finally {
+      setIsLoadingAdvanced(false);
+    }
   };
 
   const getProgressPercentage = (current, goal) => {
@@ -88,6 +158,15 @@ export default function DashboardScreen({ navigation }) {
       snack: '#10ac84'
     };
     return colors[mealType] || '#6c757d';
+  };
+
+  const getSeverityColor = (severity) => {
+    const colors = {
+      HIGH: '#ee5a24',
+      MEDIUM: '#ff9f43',
+      LOW: '#2e86de'
+    };
+    return colors[severity] || '#6c757d';
   };
 
   return (
@@ -157,43 +236,148 @@ export default function DashboardScreen({ navigation }) {
           </View>
 
           {/* Macronutrients Grid */}
-        <View style={styles.macrosGrid}>
-  <View style={styles.macroItem}>
-    <View style={styles.circleContainer}>
-      <View style={[styles.circleProgress, { borderColor: '#2e86de' }]}>
-        <Text style={styles.macroValue}>{totalNutrition.protein}g</Text>
-      </View>
-    </View>
-    <Text style={styles.macroLabel}>Protein</Text>
-  </View>
+          <View style={styles.macrosGrid}>
+            <View style={styles.macroItem}>
+              <View style={styles.circleContainer}>
+                <View style={[styles.circleProgress, { borderColor: '#2e86de' }]}>
+                  <Text style={styles.macroValue}>{totalNutrition.protein}g</Text>
+                </View>
+              </View>
+              <Text style={styles.macroLabel}>Protein</Text>
+            </View>
 
-  <View style={styles.macroItem}>
-    <View style={styles.circleContainer}>
-      <View style={[styles.circleProgress, { borderColor: '#10ac84' }]}>
-        <Text style={styles.macroValue}>{totalNutrition.carbs}g</Text>
-      </View>
-    </View>
-    <Text style={styles.macroLabel}>Carbs</Text>
-  </View>
+            <View style={styles.macroItem}>
+              <View style={styles.circleContainer}>
+                <View style={[styles.circleProgress, { borderColor: '#10ac84' }]}>
+                  <Text style={styles.macroValue}>{totalNutrition.carbs}g</Text>
+                </View>
+              </View>
+              <Text style={styles.macroLabel}>Carbs</Text>
+            </View>
 
-  <View style={styles.macroItem}>
-    <View style={styles.circleContainer}>
-      <View style={[styles.circleProgress, { borderColor: '#ff9f43' }]}>
-        <Text style={styles.macroValue}>{totalNutrition.fat}g</Text>
-      </View>
-    </View>
-    <Text style={styles.macroLabel}>Fat</Text>
-  </View>
-</View>
-
+            <View style={styles.macroItem}>
+              <View style={styles.circleContainer}>
+                <View style={[styles.circleProgress, { borderColor: '#ff9f43' }]}>
+                  <Text style={styles.macroValue}>{totalNutrition.fat}g</Text>
+                </View>
+              </View>
+              <Text style={styles.macroLabel}>Fat</Text>
+            </View>
+          </View>
         </View>
 
-        {/* AI Recommendations */}
+        {/* Advanced AI Features Section */}
+        
+        {/* 1. Nutrient Imbalance Detection */}
+        {nutrientImbalances.length > 0 && (
+          <View style={styles.imbalanceCard}>
+            <View style={styles.sectionHeader}>
+              <View style={[styles.sectionIcon, { backgroundColor: '#ff6b6b20' }]}>
+                <Text style={[styles.sectionIconText, { color: '#ff6b6b' }]}>⚖️</Text>
+              </View>
+              <Text style={styles.sectionTitle}>Nutrient Imbalance Detection</Text>
+            </View>
+            
+            <View style={styles.imbalanceList}>
+              {nutrientImbalances.slice(0, 2).map((imbalance, index) => (
+                <View key={index} style={styles.imbalanceItem}>
+                  <View style={styles.imbalanceHeader}>
+                    <View style={[styles.severityBadge, { 
+                      backgroundColor: getSeverityColor(imbalance.severity) + '20',
+                      borderColor: getSeverityColor(imbalance.severity)
+                    }]}>
+                      <Text style={[styles.severityText, { color: getSeverityColor(imbalance.severity) }]}>
+                        {imbalance.severity}
+                      </Text>
+                    </View>
+                    <Text style={styles.imbalanceType}>{imbalance.type.replace(/_/g, ' ')}</Text>
+                  </View>
+                  <Text style={styles.imbalanceMessage}>{imbalance.message}</Text>
+                  {imbalance.solutions && imbalance.solutions.length > 0 && (
+                    <View style={styles.solutionContainer}>
+                      <Text style={styles.solutionLabel}>Solution:</Text>
+                      <Text style={styles.solutionText}>{imbalance.solutions[0]}</Text>
+                    </View>
+                  )}
+                </View>
+              ))}
+            </View>
+          </View>
+        )}
+
+        {/* 2. Meal Adjustment Suggestions */}
+        {mealAdjustments.length > 0 && (
+          <View style={styles.adjustmentCard}>
+            <View style={styles.sectionHeader}>
+              <View style={[styles.sectionIcon, { backgroundColor: '#2e86de20' }]}>
+                <Text style={[styles.sectionIconText, { color: '#2e86de' }]}>🍽️</Text>
+              </View>
+              <Text style={styles.sectionTitle}>Smart Meal Adjustments</Text>
+            </View>
+            
+            <View style={styles.adjustmentList}>
+              {mealAdjustments.map((adjustment, index) => (
+                <View key={index} style={styles.adjustmentItem}>
+                  <View style={styles.adjustmentBullet} />
+                  <Text style={styles.adjustmentText}>{adjustment.message}</Text>
+                </View>
+              ))}
+            </View>
+          </View>
+        )}
+
+        {/* 3. Trend Predictions */}
+        {trendPredictions && trendPredictions.calorieTrend && (
+          <View style={styles.trendCard}>
+            <View style={styles.sectionHeader}>
+              <View style={[styles.sectionIcon, { backgroundColor: '#10ac8420' }]}>
+                <Text style={[styles.sectionIconText, { color: '#10ac84' }]}>📈</Text>
+              </View>
+              <Text style={styles.sectionTitle}>Trend Predictions</Text>
+            </View>
+            
+            <View style={styles.trendContent}>
+              <View style={styles.trendRow}>
+                <Text style={styles.trendLabel}>Current Average:</Text>
+                <Text style={styles.trendValue}>{trendPredictions.calorieTrend.currentAverage} cal/day</Text>
+              </View>
+              
+              <View style={styles.trendRow}>
+                <Text style={styles.trendLabel}>Trend:</Text>
+                <View style={styles.trendDirection}>
+                  <Text style={[
+                    styles.trendDirectionText,
+                    { color: trendPredictions.calorieTrend.trend > 0 ? '#ee5a24' : '#10ac84' }
+                  ]}>
+                    {trendPredictions.calorieTrend.trend > 0 ? '↗ Increasing' : '↘ Decreasing'}
+                  </Text>
+                  <Text style={styles.trendAmount}>
+                    ({Math.abs(trendPredictions.calorieTrend.trend)} cal/day)
+                  </Text>
+                </View>
+              </View>
+
+              
+              
+              <View style={styles.trendRow}>
+                <Text style={styles.trendLabel}>7-Day Prediction:</Text>
+                <Text style={styles.trendValue}>{trendPredictions.calorieTrend.prediction} cal</Text>
+              </View>
+              
+              {trendPredictions.calorieTrend.daysToGoal && (
+                <View style={styles.goalPrediction}>
+                  <Text style={styles.goalText}>{trendPredictions.calorieTrend.daysToGoal}</Text>
+                </View>
+              )}
+            </View>
+          </View>
+        )}
+
+        {/* 4. AI Recommendations (Original) */}
         <View style={styles.recommendationsCard}>
           <View style={styles.sectionHeader}>
             <View style={[styles.sectionIcon, { backgroundColor: '#ffeaa7' }]}>
-              {/* Replace with AI/bulb icon */}
-              <Text style={styles.sectionIconText}>AI</Text>
+              <Text style={styles.sectionIconText}>🤖</Text>
             </View>
             <Text style={styles.sectionTitle}>Smart Recommendations</Text>
           </View>
@@ -216,7 +400,6 @@ export default function DashboardScreen({ navigation }) {
               onPress={() => navigation.navigate('FoodTracking')}
             >
               <View style={[styles.actionIcon, { backgroundColor: '#2e86de' }]}>
-                {/* Replace with add food icon */}
                 <Text style={styles.actionIconText}>+</Text>
               </View>
               <Text style={styles.actionTitle}>Add Food</Text>
@@ -228,7 +411,6 @@ export default function DashboardScreen({ navigation }) {
               onPress={() => navigation.navigate('Progress')}
             >
               <View style={[styles.actionIcon, { backgroundColor: '#10ac84' }]}>
-                {/* Replace with progress icon */}
                 <Text style={styles.actionIconText}>📈</Text>
               </View>
               <Text style={styles.actionTitle}>Progress</Text>
@@ -240,7 +422,6 @@ export default function DashboardScreen({ navigation }) {
               onPress={() => navigation.navigate('Profile')}
             >
               <View style={[styles.actionIcon, { backgroundColor: '#ee5a24' }]}>
-                {/* Replace with profile icon */}
                 <Text style={styles.actionIconText}>👤</Text>
               </View>
               <Text style={styles.actionTitle}>Profile</Text>
@@ -252,7 +433,6 @@ export default function DashboardScreen({ navigation }) {
               onPress={() => navigation.navigate('NotificationSettings')}
             >
               <View style={[styles.actionIcon, { backgroundColor: '#ff9f43' }]}>
-                {/* Replace with notifications icon */}
                 <Text style={styles.actionIconText}>🔔</Text>
               </View>
               <Text style={styles.actionTitle}>Reminders</Text>
@@ -273,7 +453,6 @@ export default function DashboardScreen({ navigation }) {
           {todayEntries.length === 0 ? (
             <View style={styles.emptyState}>
               <View style={styles.emptyIcon}>
-                {/* Replace with empty state icon */}
                 <Text style={styles.emptyIconText}>🍽️</Text>
               </View>
               <Text style={styles.emptyTitle}>No meals logged today</Text>
@@ -396,6 +575,10 @@ const styles = StyleSheet.create({
   logoutIconText: {
     fontSize: 18,
   },
+  content: {
+    flex: 1,
+    padding: 16,
+  },
   overviewCard: {
     backgroundColor: 'white',
     borderRadius: 20,
@@ -472,7 +655,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   circleContainer: {
-    marginBottom: 8,
+    marginBottom: 9,
   },
   circleProgress: {
     width: 50,
@@ -492,10 +675,37 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#6c757d',
   },
-  recommendationsCard: {
+  // New Advanced Features Styles
+  imbalanceCard: {
     backgroundColor: 'white',
     borderRadius: 20,
-    padding: 24,
+    padding: 20,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 12,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: '#f1f5f9',
+  },
+  adjustmentCard: {
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 20,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 12,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: '#f1f5f9',
+  },
+  trendCard: {
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 20,
     marginBottom: 16,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -521,7 +731,143 @@ const styles = StyleSheet.create({
   sectionIconText: {
     fontSize: 12,
     fontWeight: '700',
+  },
+  imbalanceList: {
+    gap: 12,
+  },
+  imbalanceItem: {
+    backgroundColor: '#f8fafc',
+    padding: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#f1f5f9',
+  },
+  imbalanceHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+    gap: 8,
+  },
+  severityBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 4,
+    borderWidth: 1,
+  },
+  severityText: {
+    fontSize: 10,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+  },
+  imbalanceType: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#475569',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  imbalanceMessage: {
+    fontSize: 14,
+    color: '#475569',
+    lineHeight: 20,
+    fontWeight: '500',
+    marginBottom: 6,
+  },
+  solutionContainer: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 4,
+  },
+  solutionLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#2e86de',
+  },
+  solutionText: {
+    fontSize: 12,
+    color: '#475569',
+    flex: 1,
+    lineHeight: 18,
+  },
+  adjustmentList: {
+    gap: 10,
+  },
+  adjustmentItem: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    paddingVertical: 4,
+  },
+  adjustmentBullet: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#2e86de',
+    marginTop: 8,
+    marginRight: 12,
+  },
+  adjustmentText: {
+    flex: 1,
+    fontSize: 14,
+    color: '#475569',
+    lineHeight: 20,
+    fontWeight: '500',
+  },
+  trendContent: {
+    gap: 10,
+  },
+  trendRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  trendLabel: {
+    fontSize: 14,
+    color: '#64748b',
+    fontWeight: '500',
+  },
+  trendValue: {
+    fontSize: 14,
+    fontWeight: '600',
     color: '#1e293b',
+  },
+  trendDirection: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  trendDirectionText: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  trendAmount: {
+    fontSize: 12,
+    color: '#64748b',
+    fontWeight: '500',
+  },
+  goalPrediction: {
+    marginTop: 8,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: '#f1f5f9',
+  },
+  goalText: {
+    fontSize: 13,
+    color: '#10ac84',
+    fontWeight: '600',
+    fontStyle: 'italic',
+  },
+  recommendationsCard: {
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 24,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 12,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: '#f1f5f9',
   },
   recommendationsList: {
     gap: 12,

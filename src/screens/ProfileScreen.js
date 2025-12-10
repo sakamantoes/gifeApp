@@ -143,7 +143,7 @@ export default function ProfileScreen({ navigation }) { // Add navigation prop
         
         <View style={styles.infoItem}>
           <Icon name="support" size={20} color="#6c757d" />
-          <Text style={styles.infoText}>Support: support@nutritrack.com</Text>
+          <Text style={styles.infoText}>Support: support@nutrihive.com</Text>
         </View>
       </View>
 

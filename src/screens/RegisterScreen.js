@@ -157,9 +157,9 @@ export default function RegisterScreen({ navigation }) {
               </TouchableOpacity>
               <View style={styles.logoContainer}>
                 <View style={styles.logo}>
-                 <Image style={styles.logoImage} source={require('../icon/nutriTracker.png')} />
+                 <Image style={styles.logoImage} source={require('../icon/icon1.png')} />
                 </View>
-                <Text style={styles.title}>Join NutriTrack</Text>
+                <Text style={styles.title}>Join Nutrihive</Text>
               </View>
               <Text style={styles.subtitle}>Create your account to start your nutrition journey</Text>
             </Animated.View>

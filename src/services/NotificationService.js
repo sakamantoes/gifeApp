@@ -183,8 +183,8 @@ class NotificationService {
     try {
       await Notifications.scheduleNotificationAsync({
         content: {
-          title: 'Test Notification - NutriTrack',
-          body: 'This is a test notification from NutriTrack! Your meal reminders are working correctly.',
+          title: 'Test Notification - Nutrihive',
+          body: 'This is a test notification from Nutrihive! Your meal reminders are working correctly.',
           sound: 'default',
           data: { test: true },
           android: {

@@ -56,7 +56,7 @@ export default function NotificationSettingsScreen() {
             onPress: () => {
               Alert.alert(
                 'How to Enable Notifications',
-                'Go to:\nSettings > Apps > NutriTrack > Notifications > Enable notifications\n\nThen come back and enable reminders.',
+                'Go to:\nSettings > Apps > Nutrihive > Notifications > Enable notifications\n\nThen come back and enable reminders.',
                 [{ text: 'OK', style: 'default' }]
               );
             }

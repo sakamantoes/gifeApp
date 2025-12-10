@@ -132,9 +132,9 @@ export default function LoginScreen({ navigation }) {
             >
               <View style={styles.logoContainer}>
                 <View style={styles.logo}>
-                <Image style={styles.logoImage} source={require('../icon/nutriTracker.png')}/>
+                <Image style={styles.logoImage} source={require('../icon/icon1.png')}/>
                 </View>
-                <Text style={styles.title}>NutriTrack</Text>
+                <Text style={styles.title}>Nutrihive</Text>
               </View>
               <Text style={styles.subtitle}>Sign in to continue your nutrition journey</Text>
             </Animated.View>
@@ -230,7 +230,7 @@ export default function LoginScreen({ navigation }) {
 
               {/* Sign Up Link */}
               <View style={styles.signupContainer}>
-                <Text style={styles.signupText}>New to NutriTrack? </Text>
+                <Text style={styles.signupText}>New to Nutrihive? </Text>
                 <TouchableOpacity onPress={() => navigation.navigate('Register')}>
                   <Text style={styles.signupLink}>Create Account</Text>
                 </TouchableOpacity>
