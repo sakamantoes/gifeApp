@@ -132,7 +132,7 @@ export default function LoginScreen({ navigation }) {
             >
               <View style={styles.logoContainer}>
                 <View style={styles.logo}>
-                <Image style={styles.logoImage} source={require('../icon/icon1.png')}/>
+                <Image style={styles.logoImage} source={require('../icon/icon.png')}/>
                 </View>
                 <Text style={styles.title}>Nutrihive</Text>
               </View>
