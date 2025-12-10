@@ -4,7 +4,7 @@
     "slug": "nutritrack",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.pmg",
+    "icon": "./assets/icon.png",
     "android": {
       "package": "com.yourcompany.nutritrack",
       "permissions": [
